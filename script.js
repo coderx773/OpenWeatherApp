@@ -53,10 +53,18 @@ function getWeather(city) {
       return response.json();
     })
     .then(data => {
+      const sunrise = new Date(data.sys.sunrise * 1000).toLocaleTimeString();
+      const sunset = new Date(data.sys.sunset * 1000).toLocaleTimeString();
+      const windDirection = getWindDirection(data.wind.deg);
+
       const weatherHTML = `
         <h2>${data.name}</h2>
         <p><strong>${data.weather[0].main}</strong> - ${data.weather[0].description}</p>
-        <p>🌡️ ${data.main.temp} °F</p>
+        <p>🌡️ ${data.main.temp} °F (feels like ${data.main.feels_like} °F)</p>
+        <p>🔻 Min: ${data.main.temp_min} °F | 🔺 Max: ${data.main.temp_max} °F</p>
+        <p>💧 Humidity: ${data.main.humidity}%</p>
+        <p>🌬️ Wind: ${data.wind.speed} mph ${windDirection}</p>
+        <p>🌅 Sunrise: ${sunrise} | 🌇 Sunset: ${sunset}</p>
         <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="Weather icon"><br>
         <button id="favoriteBtn">⭐ Save to Favorites</button>
       `;
@@ -67,6 +75,12 @@ function getWeather(city) {
     .catch(error => {
       weatherResult.innerHTML = `<p style="color:red;">${error.message}</p>`;
     });
+}
+
+function getWindDirection(degrees) {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const index = Math.round(degrees / 45) % 8;
+  return directions[index];
 }
 
 function saveFavorite(city) {
